@@ -1,0 +1,8 @@
+flask
+python-dotenv
+groq
+pymupdf
+sentence-transformers
+chromadb
+rank-bm25
+langchain-text-splitters

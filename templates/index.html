@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- marked.js for markdown rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+</head>
+<body>
+
+<!-- Mobile nav toggle -->
+<button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">&#9776;</button>
+
+<aside class="sidebar" id="sidebar">
+    <div class="logo">
+        <span class="logo-icon">R</span>
+        <span class="logo-text">ResearchRAG</span>
+    </div>
+    <nav>
+        <a href="#rag"       class="nav-item active" data-section="rag">
+            <svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Paper Q&A
+        </a>
+        <a href="#ask"       class="nav-item" data-section="ask">
+            <svg viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+            Ask Anything
+        </a>
+        <a href="#summarize" class="nav-item" data-section="summarize">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+            Summarizer
+        </a>
+    </nav>
+    <div class="status-pill" id="status-pill">
+        <span class="dot" id="status-dot"></span>
+        <span id="chunk-count">Loading...</span>
+    </div>
+</aside>
+
+<main class="main" id="main">
+
+    <!-- ── Paper Q&A ─────────────────────────────────────────── -->
+    <section id="rag" class="section active">
+        <div class="section-header">
+            <h1>Research Paper Q&A</h1>
+            <p>Upload a PDF and ask questions grounded in the paper with page-level citations.</p>
+        </div>
+
+        <!-- Upload -->
+        <div class="card">
+            <div class="card-label">Upload paper</div>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-zone" id="upload-zone">
+                    <svg viewBox="0 0 24 24" class="upload-icon"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    <span id="file-label-text">Drop PDF here or click to browse</span>
+                    <input type="file" id="pdfFile" name="pdf" accept=".pdf" required
+                           onchange="handleFileSelect(this)">
+                </div>
+                <div class="form-row">
+                    <span id="upload-status" class="inline-status"></span>
+                    <button type="submit" id="upload-btn" class="btn btn-primary">Index paper</button>
+                </div>
+                <p id="upload-loading" class="loading-text" style="display:none">Indexing — this takes about 10 seconds...</p>
+            </form>
+        </div>
+
+        <!-- Indexed Papers -->
+        <div class="card" id="papers-card" style="display:none">
+            <div class="card-label">Indexed papers</div>
+            <div id="papers-list"></div>
+        </div>
+
+        <!-- Q&A -->
+        <div class="card">
+            <div class="card-label">Ask a question</div>
+            <form id="ragForm">
+                <div class="input-row">
+                    <input type="text" name="question" id="rag-question"
+                           placeholder="e.g. What is the main contribution of this paper?" required>
+                    <button type="submit" class="btn btn-primary">Ask</button>
+                </div>
+            </form>
+            <p id="rag-loading" class="loading-text" style="display:none">Retrieving context and generating answer...</p>
+
+            <div id="rag-answer-box" style="display:none">
+                <div class="answer-text markdown-body" id="rag-answer"></div>
+                <div id="citations-box" style="display:none">
+                    <div class="citations-label">Retrieved sources</div>
+                    <div id="citations-list"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Ask Anything ──────────────────────────────────────── -->
+    <section id="ask" class="section" style="display:none">
+        <div class="section-header">
+            <h1>Ask Anything</h1>
+            <p>General purpose assistant — not limited to uploaded papers.</p>
+        </div>
+        <div class="card">
+            <form id="askForm">
+                <div class="input-row">
+                    <input type="text" name="question" placeholder="Ask anything..." required>
+                    <button type="submit" class="btn btn-primary">Ask</button>
+                </div>
+            </form>
+            <p id="ans-loading" class="loading-text" style="display:none">Thinking...</p>
+            <div id="answer" class="answer-text markdown-body" style="display:none"></div>
+        </div>
+    </section>
+
+    <!-- ── Summarizer ────────────────────────────────────────── -->
+    <section id="summarize" class="section" style="display:none">
+        <div class="section-header">
+            <h1>Text Summarizer</h1>
+            <p>Paste any text — abstract, article, notes — and get a concise summary.</p>
+        </div>
+        <div class="card">
+            <form id="summarizeForm">
+                <textarea name="text" placeholder="Paste text here..." required rows="8"></textarea>
+                <div class="form-row">
+                    <span></span>
+                    <button type="submit" class="btn btn-primary">Summarize</button>
+                </div>
+            </form>
+            <p id="summary-loading" class="loading-text" style="display:none">Summarizing...</p>
+            <div id="summary" class="answer-text markdown-body" style="display:none"></div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+// ── Markdown config ──────────────────────────────────────────────────────────
+marked.setOptions({ breaks: true, gfm: true });
+
+function renderMarkdown(el, text) {
+    el.innerHTML = marked.parse(text || "");
+}
+
+// ── Sidebar toggle (mobile) ──────────────────────────────────────────────────
+document.getElementById("sidebar-toggle").addEventListener("click", () => {
+    document.getElementById("sidebar").classList.toggle("open");
+});
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+document.querySelectorAll(".nav-item").forEach(item => {
+    item.addEventListener("click", e => {
+        e.preventDefault();
+        const target = item.dataset.section;
+        document.querySelectorAll(".section").forEach(s => s.style.display = "none");
+        document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+        document.getElementById(target).style.display = "block";
+        item.classList.add("active");
+        // Close sidebar on mobile after nav
+        document.getElementById("sidebar").classList.remove("open");
+    });
+});
+
+// ── Status & paper list ───────────────────────────────────────────────────────
+async function fetchStatus() {
+    try {
+        const data = await (await fetch("/status")).json();
+        const count = data.indexed_chunks;
+        document.getElementById("chunk-count").textContent =
+            count > 0 ? `${count} chunks indexed` : "No papers indexed";
+        document.getElementById("status-dot").className =
+            "dot " + (count > 0 ? "active" : "idle");
+    } catch {
+        document.getElementById("chunk-count").textContent = "Server unreachable";
+    }
+}
+
+async function fetchPapers() {
+    try {
+        const data = await (await fetch("/papers")).json();
+        const papers = data.papers || [];
+        const card   = document.getElementById("papers-card");
+        const list   = document.getElementById("papers-list");
+
+        if (papers.length === 0) {
+            card.style.display = "none";
+            return;
+        }
+
+        card.style.display = "block";
+        list.innerHTML = "";
+        papers.forEach(name => {
+            const row = document.createElement("div");
+            row.className = "paper-row";
+            row.innerHTML = `
+                <span class="paper-name">
+                    <svg viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    ${name}
+                </span>
+                <button class="btn-remove" onclick="removePaper('${name}', this)" title="Remove paper">&#x2715;</button>
+            `;
+            list.appendChild(row);
+        });
+    } catch (e) {
+        console.error("Failed to fetch papers:", e);
+    }
+}
+
+async function removePaper(filename, btn) {
+    if (!confirm(`Remove "${filename}" from the index?`)) return;
+    btn.disabled = true;
+    btn.textContent = "...";
+
+    const fd = new FormData();
+    fd.append("filename", filename);
+    const res  = await fetch("/remove", { method: "POST", body: fd });
+    const data = await res.json();
+
+    if (data.error) {
+        alert(data.error);
+        btn.disabled = false;
+        btn.textContent = "✕";
+    } else {
+        fetchStatus();
+        fetchPapers();
+    }
+}
+
+fetchStatus();
+fetchPapers();
+
+// ── File select ──────────────────────────────────────────────────────────────
+function handleFileSelect(input) {
+    const name = input.files[0]?.name || "Drop PDF here or click to browse";
+    document.getElementById("file-label-text").textContent = name;
+    document.getElementById("upload-zone").classList.toggle("has-file", !!input.files[0]);
+}
+
+// ── Upload ───────────────────────────────────────────────────────────────────
+document.getElementById("uploadForm").onsubmit = async e => {
+    e.preventDefault();
+    const loading  = document.getElementById("upload-loading");
+    const statusEl = document.getElementById("upload-status");
+    const btn      = document.getElementById("upload-btn");
+
+    loading.style.display = "block";
+    statusEl.textContent  = "";
+    btn.disabled          = true;
+
+    const res  = await fetch("/upload", { method: "POST", body: new FormData(e.target) });
+    const data = await res.json();
+
+    loading.style.display = "none";
+    btn.disabled          = false;
+
+    if (data.error) {
+        statusEl.textContent = data.error;
+        statusEl.className   = "inline-status error";
+    } else {
+        statusEl.textContent = data.message;
+        statusEl.className   = "inline-status success";
+        // Reset file input
+        document.getElementById("pdfFile").value = "";
+        document.getElementById("file-label-text").textContent = "Drop PDF here or click to browse";
+        document.getElementById("upload-zone").classList.remove("has-file");
+        fetchStatus();
+        fetchPapers();
+    }
+};
+
+// ── RAG Ask ──────────────────────────────────────────────────────────────────
+document.getElementById("ragForm").onsubmit = async e => {
+    e.preventDefault();
+    const loading   = document.getElementById("rag-loading");
+    const answerBox = document.getElementById("rag-answer-box");
+    const citBox    = document.getElementById("citations-box");
+
+    loading.style.display   = "block";
+    answerBox.style.display = "none";
+
+    const data = await (await fetch("/rag-ask", { method: "POST", body: new FormData(e.target) })).json();
+    loading.style.display = "none";
+
+    const answerEl = document.getElementById("rag-answer");
+    if (data.error) {
+        answerEl.textContent = "Error: " + data.error;
+    } else {
+        renderMarkdown(answerEl, data.answer);
+    }
+    answerBox.style.display = "block";
+
+    if (!data.error && data.citations?.length) {
+        const list = document.getElementById("citations-list");
+        list.innerHTML = "";
+        data.citations.forEach(c => {
+            const div = document.createElement("div");
+            div.className = "citation-chip";
+            div.innerHTML =
+                `<strong>[Source ${c.index}]</strong> ${c.source} &mdash; ` +
+                `p.${c.page} <span class="tag">${c.section}</span>`;
+            list.appendChild(div);
+        });
+        citBox.style.display = "block";
+    } else {
+        citBox.style.display = "none";
+    }
+};
+
+// ── Ask Anything ─────────────────────────────────────────────────────────────
+document.getElementById("askForm").onsubmit = async e => {
+    e.preventDefault();
+    const loading  = document.getElementById("ans-loading");
+    const answerEl = document.getElementById("answer");
+    loading.style.display  = "block";
+    answerEl.style.display = "none";
+
+    const data = await (await fetch("/ask", { method: "POST", body: new FormData(e.target) })).json();
+    loading.style.display  = "none";
+    renderMarkdown(answerEl, data.answer || data.error);
+    answerEl.style.display = "block";
+};
+
+// ── Summarizer ───────────────────────────────────────────────────────────────
+document.getElementById("summarizeForm").onsubmit = async e => {
+    e.preventDefault();
+    const loading   = document.getElementById("summary-loading");
+    const summaryEl = document.getElementById("summary");
+    loading.style.display   = "block";
+    summaryEl.style.display = "none";
+
+    const data = await (await fetch("/summarize", { method: "POST", body: new FormData(e.target) })).json();
+    loading.style.display   = "none";
+    renderMarkdown(summaryEl, data.summary || data.error);
+    summaryEl.style.display = "block";
+};
+</script>
+</body>
+</html>

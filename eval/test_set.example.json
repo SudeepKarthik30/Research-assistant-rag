@@ -1,0 +1,32 @@
+[
+  {
+    "question": "What dataset was used for training?",
+    "expected_keywords": ["dataset", "training"],
+    "relevant_page": 4,
+    "relevant_section": "Experiments"
+  },
+  {
+    "question": "What is the main contribution of this paper?",
+    "expected_keywords": ["contribution", "propose", "novel"],
+    "relevant_page": 1,
+    "relevant_section": "Abstract"
+  },
+  {
+    "question": "What baseline methods were compared?",
+    "expected_keywords": ["baseline", "comparison", "benchmark"],
+    "relevant_page": 5,
+    "relevant_section": "Results"
+  },
+  {
+    "question": "What are the limitations of this approach?",
+    "expected_keywords": ["limitation", "future", "constraint"],
+    "relevant_page": 7,
+    "relevant_section": "Limitations"
+  },
+  {
+    "question": "What evaluation metrics were used?",
+    "expected_keywords": ["accuracy", "F1", "precision", "recall", "metric"],
+    "relevant_page": 5,
+    "relevant_section": "Evaluation"
+  }
+]
