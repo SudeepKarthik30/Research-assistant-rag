@@ -2,6 +2,8 @@
 
 A research paper Q&A tool that combines **dense vector search** and **sparse BM25 retrieval** with **Reciprocal Rank Fusion** to deliver citation-grounded answers from uploaded PDFs.
 
+Live Demo:** [Summaraizer Text](https://karthik0055-research-assistant-rag.hf.space)
+
 ---
 
 ## Features
