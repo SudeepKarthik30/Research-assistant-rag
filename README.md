@@ -18,6 +18,21 @@ Live Demo: [https://karthik0055-research-assistant-rag.hf.space](https://karthik
 
 ---
 
+## User Interface
+
+[ResearchRAG User Interface](UI.png)
+
+The Streamlit app provides two primary modes of interaction:
+
+### 1. Research Assistant Mode
+Ask complex questions about your literature corpus in plain English. The system performs a **Hybrid Search**—fusing semantic meaning via ChromaDB with keyword matching via BM25—to retrieve specific evidence and deliver answers grounded in the text.
+
+### 2. Knowledge Management
+Use the sidebar tools to maintain your research library:
+- **Upload PDFs** — Automatically parse documents into section-aware chunks (Abstract, Methods, Results) using PyMuPDF.
+- **Manage Index** — View a list of currently indexed papers or remove specific documents to update your persistent vector store.
+- **Summarize Text** — Access a standalone summarizer to get concise 2–3 sentence insights from abstracts or external text snippets.
+
 ## Architecture
 
 ```
