@@ -1,3 +1,4 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 flask
 python-dotenv
 groq
@@ -7,3 +8,4 @@ chromadb
 rank-bm25
 langchain-text-splitters
 gunicorn
+torch
