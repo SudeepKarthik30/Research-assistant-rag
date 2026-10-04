@@ -26,7 +26,7 @@ load_dotenv()
 
 # ── Clients ───────────────────────────────────────────────────────────────────
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY")) #this client is for /ask andd /summarize 
 rag    = RAGPipeline()
 
 # ── Pages ─────────────────────────────────────────────────────────────────────
